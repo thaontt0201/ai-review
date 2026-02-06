@@ -9,5 +9,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "exclude": ["prisma.config.ts"]
+  "exclude": ["prisma.config.ts", "migrations", "node_modules"]
 }

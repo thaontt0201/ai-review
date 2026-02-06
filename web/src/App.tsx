@@ -2,7 +2,7 @@ import { useState } from "react";
 import { INITIAL_CODE } from "./constants";
 import CodeForm from "./CodeForm";
 import FeedbackForm from "./FeedbackForm";
-import axios, { type AxiosError } from "axios";
+import { type AxiosError } from "axios";
 import { trpc } from "./utils/trpc";
 import { useMutation } from "@tanstack/react-query";
 
@@ -24,11 +24,9 @@ function App() {
         modelName: "llama3.2",
       };
       const res = await codeSubmit.mutateAsync(payload);
-      // const res = await axios.post(`${apiBase}/app/reviews`, payload, {
-      //   headers: { "Content-Type": "application/json" },
-      // });
 
       const data = res;
+      console.log("Received response:", data);
       const message = data?.message?.content || "No feedback received.";
 
       setFeedback(message);
