@@ -27,7 +27,7 @@ function App() {
 
       const data = res;
       console.log("Received response:", data);
-      const message = data?.message?.content || "No feedback received.";
+      const message = data?.feedback || "No feedback received.";
 
       setFeedback(message);
     } catch (err: unknown) {

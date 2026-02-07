@@ -70,7 +70,7 @@ const appRouter = router({
         modelName: input.modelName,
       });
       console.log("test", savedReview);
-      return completion;
+      return savedReview;
     }),
 });
 export type AppRouter = typeof appRouter;

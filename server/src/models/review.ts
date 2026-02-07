@@ -13,7 +13,7 @@ type Review = {
   updatedAt: Date;
 };
 const reviewSchema = z.object({
-  id: z.bigint(),
+  id: z.number(),
   title: z.string().optional(),
   language: z.string().default("javascript"),
   code: z.string(),
@@ -32,5 +32,11 @@ export async function createReview(input: ReviewInput): Promise<Review> {
     VALUES (${code}, ${feedback}, ${title}, ${language}, ${modelName})
     RETURNING id, code, feedback, title, language, model_name AS "modelName", created_at AS "createdAt", updated_at AS "updatedAt"
   `);
+  if (result && result.rows[0]) {
+    result.rows[0].id =
+      typeof result.rows[0].id === "bigint"
+        ? Number(result.rows[0].id)
+        : result.rows[0].id;
+  }
   return result?.rows[0] as unknown as Review;
 }

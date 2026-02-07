@@ -19,8 +19,9 @@ const CodeForm: React.FC<{
 
       <button
         type="submit"
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors"
+        className={`w-full text-white font-medium py-3 rounded-lg transition-colors ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
         aria-busy={loading}
+        disabled={loading}
       >
         {loading ? "Submitting..." : "Submit"}
       </button>
