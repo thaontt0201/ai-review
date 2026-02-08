@@ -4,9 +4,16 @@ import cors from "cors";
 import { pool } from "./db";
 import { z } from "zod";
 import { Ollama } from "ollama";
-import { router, publicProcedure, createContext } from "./trpc";
+import { router, createContext, protectedProcedure } from "./trpc";
 import * as trpcExpress from "@trpc/server/adapters/express";
 import { createReview } from "./models/review";
+import passport from "passport";
+import session from "express-session";
+import cookieParser from "cookie-parser";
+import { findOrCreateUserByGoogleId, getUserById, User } from "./models/user";
+import { authMiddleware } from "./middleware/auth";
+import authRouter from "./routes/auth";
+import initPassport from "./auth/passport";
 
 const reviewSchema = z.object({
   title: z.string().optional().default("Untitled Review"),
@@ -22,9 +29,10 @@ const ollama = new Ollama({ host: "http://localhost:11434" });
 const PORT = process.env.PORT || 8000;
 app.set("db", pool);
 const appRouter = router({
-  submitCode: publicProcedure
+  submitCode: protectedProcedure
     .input(reviewSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      if (!ctx.user) throw new Error("UNAUTHORIZED");
       const systemPrompt = `Train a machine learning model to analyze and provide feedback on code written in [ programming language(s) of choice, e.g., Python, JavaScript, Java]. The model should be able to identify common coding mistakes, suggest improvements, and recommend best practices. It should also be able to handle different types of code, including but not limited to:
 
         - Functionality
@@ -72,18 +80,37 @@ const appRouter = router({
       console.log("test", savedReview);
       return savedReview;
     }),
+  currentUser: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) throw new Error("UNAUTHORIZED");
+    return ctx.user;
+  }),
 });
 export type AppRouter = typeof appRouter;
 
 app.use(cors());
+app.use(cookieParser());
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "dev",
+    resave: false,
+    saveUninitialized: false,
+  }),
+);
+
+initPassport();
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(
   "/trpc",
+  authMiddleware,
   trpcExpress.createExpressMiddleware({
     router: appRouter,
     createContext,
   }),
 );
+
+app.use("/auth", authRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
