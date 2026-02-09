@@ -10,7 +10,6 @@ import { createReview } from "./models/review";
 import passport from "passport";
 import session from "express-session";
 import cookieParser from "cookie-parser";
-import { findOrCreateUserByGoogleId, getUserById, User } from "./models/user";
 import { authMiddleware } from "./middleware/auth";
 import authRouter from "./routes/auth";
 import initPassport from "./auth/passport";

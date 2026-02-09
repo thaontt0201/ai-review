@@ -1,12 +1,13 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { trpc } from "../utils/trpc";
+import { useQuery } from "@tanstack/react-query";
 
 export interface User {
   id: number;
   googleId: string;
   email: string;
   name: string;
-  pictureUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,21 +25,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const currentUserQuery = trpc.currentUser.useQuery(undefined, {
-    retry: false,
-    enabled: true,
-  });
+  const currentUserQuery = useQuery(
+    trpc.currentUser.queryOptions(undefined, {
+      retry: false,
+      enabled: true,
+      refetchOnWindowFocus: false,
+    }),
+  );
 
   useEffect(() => {
-    if (!currentUserQuery.isLoading) {
+    if (currentUserQuery.isLoading) {
+      setIsLoading(true);
+    } else {
       setIsLoading(false);
-      if (currentUserQuery.data) {
+      if (currentUserQuery.isSuccess && currentUserQuery.data) {
         setUser(currentUserQuery.data);
       } else {
         setUser(null);
       }
     }
-  }, [currentUserQuery.isLoading, currentUserQuery.data]);
+  }, [
+    currentUserQuery.isLoading,
+    currentUserQuery.isSuccess,
+    currentUserQuery.data,
+  ]);
 
   const login = () => {
     window.location.href = "/auth/google";

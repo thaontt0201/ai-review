@@ -99,7 +99,7 @@ export async function getSessionByToken(
 
 export async function deleteSession(token: string): Promise<void> {
   await pool?.query(
-    sql.typeAlias("void")`
+    sql.type(z.void())`
       DELETE FROM sessions
       WHERE token = ${token}
     `,

@@ -30,6 +30,7 @@
     "passport-google-oauth20": "^2.0.0",
     "pg": "^8.18.0",
     "slonik": "^48.10.0",
+    "superjson": "^2.2.6",
     "zod": "^4.1.12"
   },
   "devDependencies": {
